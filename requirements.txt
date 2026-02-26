@@ -1,0 +1,8 @@
+agno
+google-genai
+pillow
+python-dotenv
+flask
+fastapi==0.111.0
+uvicorn[standard]==0.23.2
+

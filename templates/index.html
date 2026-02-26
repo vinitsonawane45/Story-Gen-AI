@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryGen | Multi-Agent AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data:,">
+</head>
+<body>
+
+<div id="authOverlay" class="auth-overlay hidden">
+    <div class="auth-card">
+        <button class="close-auth" onclick="toggleAuth()">&times;</button>
+        
+        <div id="signInForm">
+            <h2>Welcome Back</h2>
+            <p>Sign in to continue your story</p>
+            <div class="input-group">
+                <input type="email" placeholder="Email Address" id="loginEmail">
+                <input type="password" placeholder="Password" id="loginPassword">
+            </div>
+            <button class="auth-btn" onclick="handleAuth('login')">Sign In</button>
+            <p class="switch-auth">Don't have an account? <a href="#" onclick="switchForm('signup')">Sign Up</a></p>
+        </div>
+
+        <div id="signUpForm" class="hidden">
+            <h2>Create Account</h2>
+            <p>Join the Multi-Agent revolution</p>
+            <div class="input-group">
+                <input type="text" placeholder="Full Name" id="regName">
+                <input type="email" placeholder="Email Address" id="regEmail">
+                <input type="password" placeholder="Password" id="regPassword">
+            </div>
+            <button class="auth-btn" onclick="handleAuth('signup')">Create Account</button>
+            <p class="switch-auth">Already have an account? <a href="#" onclick="switchForm('login')">Sign In</a></p>
+        </div>
+    </div>
+</div>
+
+<div id="profileModal" class="modal hidden">
+    <div class="modal-content profile-card">
+        <span class="close" onclick="toggleProfileModal()">&times;</span>
+        <div class="profile-header">
+            <div class="profile-avatar"><i class="fas fa-user-astronaut"></i></div>
+            <h2 id="profileName">User Name</h2>
+            <p id="profileEmail">user@example.com</p>
+        </div>
+        <div class="profile-stats">
+            <div class="stat">
+                <span class="stat-value" id="storyCount">0</span>
+                <span class="stat-label">Stories</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="userRankBadge">Novice</span>
+                <span class="stat-label">Rank</span>
+            </div>
+        </div>
+        <div class="profile-info">
+            <p><strong>Member Since:</strong> <span id="memberSince">2024</span></p>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">
+            <i class="fas fa-power-off"></i> Log Out
+        </button>
+    </div>
+</div>
+
+<div id="galleryOverlay" class="auth-overlay hidden">
+    <div class="gallery-card">
+        <div class="gallery-header">
+            <h2><i class="fas fa-images"></i> Your Story Gallery</h2>
+            <button class="close-auth" onclick="toggleGallery()">&times;</button>
+        </div>
+        <div id="galleryContent" class="gallery-grid">
+            </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div class="glass-container">
+    <header>
+        <div class="header-top">
+            <h1><i class="fas fa-wand-magic-sparkles"></i> StoryGen AI</h1>
+            
+            <div class="header-actions">
+                <div id="userProfile" class="user-profile hidden">
+                    <div class="profile-trigger" onclick="toggleDropdown()">
+                        <span id="userNameDisplay">User</span>
+                        <div class="profile-circle"><i class="fas fa-user"></i></div>
+                    </div>
+
+                    <div id="profileDropdown" class="profile-dropdown hidden">
+                        <button onclick="toggleProfileModal()">
+                            <i class="fas fa-id-card"></i> View Profile
+                        </button>
+                        <button onclick="toggleGallery()">
+                            <i class="fas fa-history"></i> My Stories
+                        </button>
+                        <hr class="dropdown-divider">
+                        <button onclick="handleLogout()" class="logout-link">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                <button id="signInBtn" class="secondary-btn" onclick="toggleAuth()">
+                    Sign In
+                </button>
+            </div>
+        </div>
+        <p class="tagline">Orchestrating specialized agents to narrate your images.</p>
+    </header>
+
+    <div class="main-interface">
+        <div class="upload-section">
+            <div id="dropZone" class="drop-zone">
+                <i class="fas fa-cloud-arrow-up"></i>
+                <p>Drag & Drop or Click to Upload</p>
+                <input type="file" id="imageInput" accept="image/*" hidden>
+            </div>
+            <div id="previewContainer" class="hidden">
+                <img id="imagePreview" src="" alt="Preview">
+                <button class="change-img-btn" onclick="resetUpload()">Change Image</button>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <div class="input-group">
+                <label>Story Genre</label>
+                <select id="storyTone">
+                    <option value="noir">Classic Noir Mystery</option>
+                    <option value="cyberpunk">Gritty Cyberpunk</option>
+                    <option value="fantasy">Epic High Fantasy</option>
+                    <option value="horror">Gothic Horror</option>
+                    <option value="action">Fast-Paced Action</option>
+                </select>
+            </div>
+            <button id="generateBtn" onclick="generateStory()">
+                <span>Ignite Agents</span>
+                <i class="fas fa-bolt"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="agentStatus" class="agent-status-container hidden">
+        <div class="agent-item" id="agent-vision">
+            <div class="spinner"></div> <span>Vision Agent: Analyzing visual context...</span>
+        </div>
+        <div class="agent-item" id="agent-creative">
+            <div class="spinner"></div> <span>Creative Agent: Drafting narrative arc...</span>
+        </div>
+        <div class="agent-item" id="agent-editor">
+            <div class="spinner"></div> <span>Editor Agent: Polishing final prose...</span>
+        </div>
+    </div>
+
+    <div class="result-card">
+        <div class="result-header">
+            <h3><i class="fas fa-feather-pointed"></i> <span id="storyTitleDisplay">The Narrative</span></h3>
+
+
+            <div class="result-tools">
+                <button id="audioBtn" onclick="toggleAudio()" class="icon-btn" title="Listen to Story">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <button onclick="downloadPDF()" class="icon-btn" title="Download PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+                <button onclick="copyStory()" class="icon-btn" title="Copy Text">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+        </div>
+        
+        <div id="storyOutput" class="story-content">Upload an image to begin your journey.</div>
+
+        <div id="chatTrigger" class="chat-trigger hidden" onclick="toggleCharacterChat()">
+            <span class="orb-icon">🎭</span>
+            <div class="notification-ping"></div>
+        </div>
+
+        <div id="charChatOverlay" class="char-chat-layout hidden">
+            <div class="chat-header">
+                <div class="char-avatar-glow">
+                    <span id="charEmoji">🎭</span>
+                    <div class="resonance-ring"></div>
+                </div>
+                <div class="char-status">
+                    <h4 id="charName">Character Chat</h4>
+                <div class="status-badge"><span class="pulse-dot"></span> Personality Locked</div>
+            </div>
+            <button onclick="closeChat()" class="close-btn"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            <div class="ai-msg">I am ready to resonate with your story...</div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="userMsg" placeholder="Speak to the code..." autocomplete="new-password">
+            <button onclick="sendChatMessage()" class="send-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill = "white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+        <div id="emotionPill" class="emotion-pill hidden">
+            <span id="emotionEmoji" class="emotion-emoji">✨</span>
+            <div class="label-group">
+                <span id="emotionLabel" class="emotion-label">Analyzing Mood...</span>
+                <canvas id="moodGraph" width="60" height="20"></canvas>
+            </div>
+        </div>
+
+
+
+        <div id="storyActions" class="story-action-row hidden">
+            <button onclick="generateStory()" class="action-btn">
+                <i class="fas fa-sync-alt"></i> New Variation
+            </button>
+            <button onclick="toggleTranslator()" class="action-btn">
+                <i class="fas fa-language"></i> Translate
+            </button>
+        </div>
+
+        <div id="translatorBox" class="translator-panel hidden">
+            <div class="translator-content">
+                <label for="targetLanguage"><i class="fas fa-globe"></i> Select Language</label>
+                <div class="translator-controls">
+                    <select id="targetLanguage" class="lang-select">
+
+                        <!-- Indian Languages -->
+                        <option value="mr">Marathi (मराठी)</option>
+                        <option value="hi">Hindi (हिन्दी)</option>
+                        <option value="en">English</option>
+                        <option value="bn">Bengali (বাংলা)</option>
+                        <option value="ta">Tamil (தமிழ்)</option>
+                        <option value="te">Telugu (తెలుగు)</option>
+                        <option value="gu">Gujarati (ગુજરાતી)</option>
+                        <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                        <option value="ml">Malayalam (മലയാളം)</option>
+                        <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                        <option value="ur">Urdu (اردو)</option>
+                        <option value="or">Odia (ଓଡ଼ିଆ)</option>
+                        <option value="as">Assamese (অসমীয়া)</option>
+
+                        <!-- European Languages -->
+                        <option value="es">Spanish (Español)</option>
+                        <option value="fr">French (Français)</option>
+                        <option value="de">German (Deutsch)</option>
+                        <option value="it">Italian (Italiano)</option>
+                        <option value="pt">Portuguese (Português)</option>
+                        <option value="ru">Russian (Русский)</option>
+                        <option value="nl">Dutch (Nederlands)</option>
+                        <option value="sv">Swedish (Svenska)</option>
+                        <option value="pl">Polish (Polski)</option>
+                        <option value="uk">Ukrainian (Українська)</option>
+                        <option value="ro">Romanian (Română)</option>
+                        <option value="cs">Czech (Čeština)</option>
+                        <option value="el">Greek (Ελληνικά)</option>
+                        <option value="hu">Hungarian (Magyar)</option>
+                        <option value="fi">Finnish (Suomi)</option>
+                        <option value="da">Danish (Dansk)</option>
+                        <option value="no">Norwegian (Norsk)</option>
+
+                        <!-- Asian Languages -->
+                        <option value="zh-cn">Chinese Simplified (简体中文)</option>
+                        <option value="zh-tw">Chinese Traditional (繁體中文)</option>
+                        <option value="ja">Japanese (日本語)</option>
+                        <option value="ko">Korean (한국어)</option>
+                        <option value="th">Thai (ไทย)</option>
+                        <option value="vi">Vietnamese (Tiếng Việt)</option>
+                        <option value="id">Indonesian (Bahasa Indonesia)</option>
+                        <option value="ms">Malay (Bahasa Melayu)</option>
+
+                        <!-- Middle East -->
+                        <option value="ar">Arabic (العربية)</option>
+                        <option value="he">Hebrew (עברית)</option>
+                        <option value="fa">Persian (فارسی)</option>
+
+                        <!-- African Languages -->
+                        <option value="sw">Swahili (Kiswahili)</option>
+                        <option value="zu">Zulu (isiZulu)</option>
+
+                        <!-- Others -->
+                        <option value="tr">Turkish (Türkçe)</option>
+                        <option value="af">Afrikaans</option>
+                        <option value="sr">Serbian (Српски)</option>
+                        <option value="sk">Slovak (Slovenčina)</option>
+                        <option value="bg">Bulgarian (Български)</option>
+
+                    </select>
+                    <button onclick="translateStory()" class="translate-action-btn">
+                        Translate <i class="fas fa-magic"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <audio id="storyAudioPlayer" class="hidden"></audio>
+
+        <div class="share-bar">
+            <span>Share Tale:</span>
+            <button onclick="shareStory('linkedin')" class="share-btn ln"><i class="fab fa-linkedin"></i></button>
+            <button onclick="shareStory('whatsapp')" class="share-btn wa"><i class="fab fa-whatsapp"></i></button>
+            <button onclick="shareStory('twitter')" class="share-btn tw"><i class="fab fa-x-twitter"></i></button>
+        </div>
+
+        <div id="ratingSection" class="rating-container hidden">
+            <p class="rating-label">Rate this Tale</p>
+            <div class="star-group">
+                <i class="fas fa-star" onclick="rateStory(1)"></i>
+                <i class="fas fa-star" onclick="rateStory(2)"></i>
+                <i class="fas fa-star" onclick="rateStory(3)"></i>
+                <i class="fas fa-star" onclick="rateStory(4)"></i>
+                <i class="fas fa-star" onclick="rateStory(5)"></i>
+            </div>
+            <p id="ratingStatus" class="rating-status-text"></p>
+        </div>
+    </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

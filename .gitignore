@@ -1,0 +1,33 @@
+# --- Grand Architect System Exclusions ---
+
+# 1. API Keys & Sensitive Data
+.env
+secret_key.txt
+*.json
+!manifest.json
+
+# 2. Python Environment & Dependencies
+venv/
+env/
+ENV/
+bin/
+lib/
+include/
+*.pyc
+__pycache__/
+
+# 3. Local OS & IDE Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 4. Storage & Temporary Files
+uploads/
+temp_stories/
+*.log
+static/temp/*
+
+# 5. Database
+*.db
+*.sqlite3
